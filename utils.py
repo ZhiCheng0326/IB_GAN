@@ -6,6 +6,7 @@ import numpy as np
 import scipy.io as sio
 # from pathlib2 import Path
 from collections import namedtuple
+import os
 
 
 def get_data(activation, isTrain, fake_size):
@@ -14,9 +15,8 @@ def get_data(activation, isTrain, fake_size):
     #   trn.y is trainiing class, with numbers from 0 to 9
     #   trn.Y is training class, but coded as a 10-dim vector with one entry set to 1
     # similarly for tst
-    # (X_train, _), (X_test, _) = mnist.load_data(path="./datasets/mnist.npz")
-    (X_train, _), (X_test, _) = mnist.load_data(path="/cluster/home/it_stu150/lzc/IB_GAN_ZC/datasets/mnist.npz")
-    # (X_train, _), (X_test, _) = mnist.load_data(path="C:\\Users\\leezh\\Desktop\\L_ZhiCheng\\上海交通大学\\屠老师实验室\\Codes\\IB_GAN_ZC\\datasets\\mnist.npz")
+
+    (X_train, _), (X_test, _) = mnist.load_data(path=os.path.join(os.getcwd(), "datasets/mnist.npz"))
     #sample size, test_set=10000, train_set=60000, 60000 too large for memory
 
     X_train = np.reshape(X_train,[-1,28*28*1])
