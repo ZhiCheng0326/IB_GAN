@@ -38,7 +38,8 @@ def get_data(activation, isTrain, fake_size):
         y_test = np.ones((X_test.shape[0]-fake_size,)).astype(int)
         fake_real_tstX = np.concatenate([X_test[:X_test.shape[0]-fake_size], gen_imgs], axis=0)
         fake_real_tsty = np.concatenate([y_test, fake_y], axis=0)
-        tst = Dataset(fake_real_tstX , fake_real_tsty, _)
+        fake_real_tstY  = keras.utils.np_utils.to_categorical(fake_real_tsty,  2)
+        tst = Dataset(fake_real_tstX , fake_real_tsty, fake_real_tstY)
 
     else:
         tst = Dataset(X_test , _, _)
