@@ -25,48 +25,6 @@ import matplotlib.gridspec as gridspec
 import seaborn as sns
 sns.set_style('darkgrid')
 
-# def fake_datasets():
-#     fake_size = 5000
-#     generator = load_model("models/generator_"+ activ + ".h5")
-#     # generator = load_model("/cluster/home/it_stu150/lzc/IB_GAN_ZC/models/generator_"+ activ + ".h5")
-#     noise = np.random.normal(0, 1, (fake_size,100))
-#     gen_imgs = generator.predict(noise)
-#
-#     return gen_imgs
-#
-# def get_data(fake_size):
-#     # Returns two namedtuples, with MNIST training and testing data
-#     #   trn.X is training data
-#     #   trn.y is trainiing class, with numbers from 0 to 9
-#     #   trn.Y is training class, but coded as a 10-dim vector with one entry set to 1
-#     # similarly for tst
-#     (X_train, _), (X_test, _) = mnist.load_data(path=os.path.join(os.getcwd(), "datasets/mnist.npz"))
-#     X_train = np.reshape(X_train,[-1,28*28*1])
-#     X_test = np.reshape(X_test,[-1,28*28*1])
-#
-#     X_train = X_train / 127.5 - 1.
-#     X_test = X_test / 127.5 - 1.
-#
-#     # modified the test set for MI calculations
-#     gen_imgs = fake_datasets()
-#     fake_y = np.zeros((fake_size,)).astype(int)
-#     y_test = np.ones((fake_size,)).astype(int)
-#     fake_real_tstX = np.concatenate([X_test[:fake_size], gen_imgs], axis=0)
-#     fake_real_tsty = np.concatenate([y_test, fake_y], axis=0)
-#
-#     y_train = np.ones((X_train.shape[0],1)).astype(int)
-#
-#     Y_train = keras.utils.np_utils.to_categorical(y_train, 2)
-#     fake_real_tstY  = keras.utils.np_utils.to_categorical(fake_real_tsty,  2)
-#
-#     Dataset = namedtuple('Dataset',['X','y','Y'])
-#     trn = Dataset(X_train, y_train, Y_train)
-#     tst = Dataset(fake_real_tstX, fake_real_tsty, fake_real_tstY)
-#
-#     del X_train, y_train, Y_train, y_test, fake_real_tstY
-#
-#     return trn,tst
-
 def computeMI(tst, measures, loss, PLOT_LAYERS, ARCH, MAX_EPOCHS):
     # Functions to return upper and lower bounds on entropy of layer activity
     noise_variance = 1e-1                    # Added Gaussian noise variance
@@ -83,10 +41,6 @@ def computeMI(tst, measures, loss, PLOT_LAYERS, ARCH, MAX_EPOCHS):
         saved_labelixs[i] = tst.y == i
 
     labelprobs = np.mean(tst.Y, axis=0)
-    # d_loss_list = []
-    # g_loss_list = []
-    # d_loss_real_list = []
-    # d_loss_fake_list = []
     for activation in measures.keys():
         cur_dir = 'rawdata/' + activation + '_' + ARCH
         if not os.path.exists(cur_dir):
@@ -108,10 +62,6 @@ def computeMI(tst, measures, loss, PLOT_LAYERS, ARCH, MAX_EPOCHS):
             loss['g_loss'].append(d['g_loss'])
             loss['d_loss_real'].append(d['d_loss_real'])
             loss['d_loss_fake'].append(d['d_loss_fake'])
-            # d_loss_list.append(d['d_loss'])
-            # g_loss_list.append(d['g_loss'])
-            # d_loss_real_list.append(d['d_loss_real'])
-            # d_loss_fake_list.append(d['d_loss_fake'])
             if epoch in measures[activation]: # Skip this epoch if its already been processed
                 continue                      # this is a trick to allow us to rerun this cell multiple times)
 
@@ -189,20 +139,17 @@ def show_sampled_image(data, save_plot_dir):
         plt.yticks([])
         plt.grid(False)
         plt.imshow(img_x[i], cmap=plt.cm.binary)
-        # The CIFAR labels happen to be arrays,
-        # which is why you need the extra index
         plt.xlabel(class_names[img_y[i]])
     plt.show()
     fig_name = "sampled_real_fake_test.PNG"
-    # plt.savefig("plots/mnist/"+"sampled_real_fake_test_"+ activ + ".png")
     plt.savefig(os.path.join(save_plot_dir, fig_name))
 
 def main():
-    parser = argparse.ArgumentParser(description='Information Bottleneck GAN')
+    parser = argparse.ArgumentParser(description='Calculate Mutual Information GAN')
     parser.add_argument('--batch-size', type=int, default=32,
                         help='input batch size for training (default: 32)')
-    parser.add_argument('--activation', type=str, default='tanh', choices = ['tanh', 'relu', 'leakyrelu'],
-                        help='options: tanh, relu, leakyrelu (default:tanh)')
+    parser.add_argument('--activation', type=str, choices = ['tanh', 'relu', 'leakyrelu'], required = True,
+                        help='options: tanh, relu, leakyrelu')
     parser.add_argument('--fake_size', type=int, default=5000,
                         help='proportion of fake images. Must be <=10000  (default:5000)')
 
@@ -252,7 +199,5 @@ def main():
 if __name__=='__main__':
 
     print("Start:", datetime.datetime.now())
-    ###################################################
     main()
-    ##################################################
     print("End:", datetime.datetime.now())

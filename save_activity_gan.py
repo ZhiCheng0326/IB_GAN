@@ -34,7 +34,6 @@ class GAN():
         self.img_dir = "images_" + self.activation
 
         optimizer = Adam(args.lr, args.beta_1)
-        # optimizer = SGD(lr=0.01, momentum=0.5)
 
         # Build and compile the discriminator
         self.discriminator = self.build_discriminator()
@@ -61,8 +60,7 @@ class GAN():
         print("tst shape:", self.tst.X.shape)
 
         ## Initialize LoggingReporter
-        self.log = LoggingReporter(self.trn, self.tst, self.discriminator,
-                                    self.rawdata_dir, self.img_dir, do_save_func=self.do_report)
+        self.log = LoggingReporter(self.trn, self.tst, self.rawdata_dir, self.img_dir, do_save_func=self.do_report)
 
     def build_generator(self):
 
@@ -141,8 +139,7 @@ class GAN():
         fake = np.zeros((batch_size,))
 
         for epoch in range(epochs):
-            ## loggingreporter ##
-            self.log.on_epoch_begin(epoch)
+            self.log.on_epoch_begin(self.discriminator, epoch)
 
             # ---------------------
             #  Train Discriminator
@@ -157,8 +154,7 @@ class GAN():
             # Generate a batch of new images
             gen_imgs = self.generator.predict(noise)
 
-            ## loggingreporter ##
-            self.log.on_batch_begin(batch_size)
+            self.log.on_batch_begin(self.discriminator, batch_size)
             # Train the discriminator
             d_loss_real = self.discriminator.train_on_batch(imgs, valid)
             d_loss_fake = self.discriminator.train_on_batch(gen_imgs, fake)
@@ -178,37 +174,14 @@ class GAN():
 
             if isTrain:
                 if epoch == (epochs-1): #only save model at last epoch
-                    self.save_model(self.generator,self.discriminator)
+                    utils.save_model(self.generator,self.discriminator, self.activation)
 
                 # If at save interval => save generated image samples
                 if self.do_report is not None and self.do_report(epoch):
-                    self.sample_images(epoch)
+                    utils.sample_images(self.generator, self.img_dir, epoch)
 
             else: # if not training, save activity for MI calculation
-                self.log.on_epoch_end(d_loss_real[0], d_loss_fake[0], g_loss, epoch)
-
-    def save_model(self, generator, discriminator):
-        generator.save("models/generator_"+self.activation +".h5")
-        discriminator.save("models/discriminator_"+self.activation+".h5")
-
-    def sample_images(self, epoch):
-        r, c = 5, 5
-        noise = np.random.normal(0, 1, (r * c, self.latent_dim))
-        gen_imgs = self.generator.predict(noise)
-        gen_imgs = np.reshape(gen_imgs, [-1, 28,28,1])
-
-        # Rescale images 0 - 1
-        gen_imgs = 0.5 * gen_imgs + 0.5
-
-        fig, axs = plt.subplots(r, c)
-        cnt = 0
-        for i in range(r):
-            for j in range(c):
-                axs[i,j].imshow(gen_imgs[cnt, :,:,0], cmap='gray')
-                axs[i,j].axis('off')
-                cnt += 1
-        fig.savefig(self.img_dir + "/%d.png" % epoch)
-        plt.close()
+                self.log.on_epoch_end(self.discriminator, d_loss_real[0], d_loss_fake[0], g_loss, epoch)
 
 
 if __name__ == '__main__':
@@ -222,10 +195,10 @@ if __name__ == '__main__':
                         help='learning rate (default: 0.0002)')
     parser.add_argument('--beta_1', type=float, default=0.5,
                         help='beta_1 for ADAM (default: 0.5)')
-    parser.add_argument('--activation', type=str, default='tanh', choices = ['tanh', 'relu', 'leakyrelu'],
-                        help='options: tanh, relu, leakyrelu (default:tanh)')
+    parser.add_argument('--activation', type=str, choices = ['tanh', 'relu', 'leakyrelu'], required = True,
+                        help='options: tanh, relu, leakyrelu')
     parser.add_argument('--isTrain', type=int, choices = [0,1], required=True,
-                        help='0 to get each layer activities, 1 to obtain Generator to construct fake+real dataset (default:0)')
+                        help='0 to get each layer activities, 1 to obtain Generator to construct fake+real dataset')
     parser.add_argument('--fake_size', type=int, default=5000,
                         help='proportion of fake images. Must be <=10000  (default:5000)')
 
@@ -237,7 +210,7 @@ if __name__ == '__main__':
     print("Start:", datetime.datetime.now())
     ###################################################
     gan = GAN(args)
-    gan.log.on_train_begin()
+    gan.log.on_train_begin(gan.discriminator)
     gan.train(epochs=args.epochs, batch_size=args.batch_size, isTrain=args.isTrain)
     ###################################################
     print("End:", datetime.datetime.now())

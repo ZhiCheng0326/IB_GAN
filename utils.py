@@ -3,10 +3,12 @@ import keras.backend as K
 from keras.datasets import mnist
 from keras.models import load_model
 import numpy as np
-import scipy.io as sio
-# from pathlib2 import Path
 from collections import namedtuple
 import os
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 
 def get_data(activation, isTrain, fake_size):
@@ -49,11 +51,32 @@ def get_data(activation, isTrain, fake_size):
     return trn,tst
 
 def fake_datasets(activation, fake_size):
-
-    # generator = load_model("/cluster/home/it_stu150/lzc/IB_GAN_ZC/models/generator_"+ self.activation + ".h5")
     generator = load_model("models/generator_"+ activation + ".h5")
-    # generator = load_model("C:\\Users\\leezh\\Desktop\\L_ZhiCheng\\上海交通大学\\屠老师实验室\\Codes\\IB_GAN_ZC\\models\\generator.h5")
     noise = np.random.normal(0, 1, (fake_size,100))
     gen_imgs = generator.predict(noise)
 
     return gen_imgs
+
+def save_model(generator, discriminator, activation):
+    generator.save("models/generator_"+ activation +".h5")
+    discriminator.save("models/discriminator_"+ activation+".h5")
+
+def sample_images(generator, img_dir, epoch):
+    latent_dim = 100
+    r, c = 5, 5
+    noise = np.random.normal(0, 1, (r * c, latent_dim))
+    gen_imgs = generator.predict(noise)
+    gen_imgs = np.reshape(gen_imgs, [-1, 28,28,1])
+
+    # Rescale images 0 - 1
+    gen_imgs = 0.5 * gen_imgs + 0.5
+
+    fig, axs = plt.subplots(r, c)
+    cnt = 0
+    for i in range(r):
+        for j in range(c):
+            axs[i,j].imshow(gen_imgs[cnt, :,:,0], cmap='gray')
+            axs[i,j].axis('off')
+            cnt += 1
+    fig.savefig(img_dir + "/%d.png" % epoch)
+    plt.close()

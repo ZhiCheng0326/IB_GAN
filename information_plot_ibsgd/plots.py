@@ -1,4 +1,6 @@
 import os
+import numpy as np
+from six.moves import cPickle
 # %matplotlib inline
 import matplotlib
 matplotlib.use('Agg')
@@ -52,8 +54,6 @@ class Plots():
             # upper
             plt.subplot(gs[1,1])
             for lndx, layerid in enumerate(self.PLOT_LAYERS):
-                #for epoch in epochs:
-                #    print('her',epoch, measures[activation][epoch]['MI_XM_upper'])
                 xmvalsU = np.array([vals[epoch]['MI_XM_upper'][layerid] for epoch in epochs])
                 plt.plot(epochs, xmvalsU, label='Layer %d'%layerid)
                 #plt.errorbar(epochs, (xmvalsL + xmvalsU)/2,xmvalsU - xmvalsL, label='Layer %d'%layerid)
@@ -97,7 +97,6 @@ class Plots():
                 hbinnedvals = np.array([vals[epoch]['MI_XM_bin'][layerid] for epoch in epochs])
                 plt.semilogx(epochs, hbinnedvals, label='Layer %d'%layerid)
             plt.ylabel("I(X;M)")
-            # plt.title('tanh'+ ", BINNED")
             plt.title(activation+ ", BINNED")
             plt.legend(loc='lower left', bbox_to_anchor=(1.1, 0))
 
@@ -111,7 +110,6 @@ class Plots():
 
             plt.tight_layout()
             fig_name = 'summary_' + self.ARCH + ".PNG"
-            # plt.savefig('plots/mnist/' + 'summary_'+ activation + "_" + self.ARCH,bbox_inches='tight')
             plt.savefig(os.path.join(self.save_plot_dir, fig_name),bbox_inches='tight')
 
     def plot_error(self):
@@ -143,7 +141,6 @@ class Plots():
             plt.title(activation+ ", d_loss_real vs d_loss_fake")
             plt.tight_layout()
             fig_name = 'dgloss_' +self.ARCH+ '.png'
-            # plt.savefig('plots/mnist/' + 'dgloss_'+ activation + '_' +self.ARCH+ '.png')
             plt.savefig(os.path.join(self.save_plot_dir, fig_name),bbox_inches='tight')
 
     def plot_compare_error_MI(self):
@@ -187,7 +184,6 @@ class Plots():
             plt.title(activation+ ", d_loss vs g_loss")
 
             plt.tight_layout()
-            # plt.savefig('plots/mnist/' + 'LOSSvsMI_'+ activation + "_" + self.ARCH + '.png')
             fig_name = 'LOSSvsMI_' + self.ARCH + '.png'
             plt.savefig(os.path.join(self.save_plot_dir, fig_name),bbox_inches='tight')
 
@@ -195,9 +191,7 @@ class Plots():
         plt.figure(figsize=(12,5))
 
         gs = gridspec.GridSpec(len(self.measures), len(self.PLOT_LAYERS))
-        # saved_data = {}
         for actndx, activation in enumerate(self.measures.keys()):
-            # cur_dir = 'rawdata/' + DIR_TEMPLATE % activation
             cur_dir = 'rawdata/' + activation +'_'+self.ARCH
             if not os.path.exists(cur_dir):
                 continue
@@ -206,9 +200,6 @@ class Plots():
             means = []
             stds = []
             wnorms = []
-            # trnloss = []
-            # tstloss = []
-        #     print(cur_dir) #rawdata/tanh_1024-20-20-20
             for epochfile in sorted(os.listdir(cur_dir)):
                 if not epochfile.startswith('epoch'):
                     continue
@@ -224,13 +215,8 @@ class Plots():
                 wnorms.append(d['data']['weights_norm'])
                 means.append(d['data']['gradmean'])
                 stds.append(d['data']['gradstd'])
-                # trnloss.append(d['loss']['trn'])
-                # tstloss.append(d['loss']['tst'])
-        #     print(len(trnloss)) ##144
-            # wnorms, means, stds, trnloss, tstloss = map(np.array, [wnorms, means, stds, trnloss, tstloss])
-            wnorms, means, stds = map(np.array, [wnorms, means, stds])
-            # saved_data[activation] = {'epochs':epochs, 'wnorms':wnorms, 'means': means, 'stds': stds}
 
+            wnorms, means, stds = map(np.array, [wnorms, means, stds])
 
             for lndx,layerid in enumerate(self.PLOT_LAYERS):
                 plt.subplot(gs[actndx, lndx])
@@ -247,7 +233,6 @@ class Plots():
 
             plt.legend(loc='lower left', bbox_to_anchor=(1.1, 0.2))
             plt.tight_layout()
-            # plt.savefig('plots/mnist/' +  'snr_'+ activation + '_' + self.ARCH, bbox_inches='tight')
             fig_name = 'snr_' + self.ARCH + ".png"
             plt.savefig(os.path.join(self.save_plot_dir, fig_name),bbox_inches='tight')
 
@@ -261,7 +246,7 @@ class Plots():
             epochs = sorted(vals.keys())
             if not len(epochs):
                 continue
-            plt.subplot(1,2,actndx+1)
+            # plt.subplot(1,2,actndx+1)
             for epoch in epochs:
                 c = sm.to_rgba(epoch)
                 xmvals = np.array(vals[epoch]['MI_XM_'+infoplane_measure])[self.PLOT_LAYERS]
@@ -275,13 +260,11 @@ class Plots():
             plt.xlim([0, 14])
             plt.xlabel('I(X;M)')
             plt.ylabel('I(Y;M)')
-            # plt.title('tanh, MI of discriminator')
             plt.title(activation+', MI of discriminator')
 
             cbaxes = fig.add_axes([1.0, 0.125, 0.03, 0.8])
             plt.colorbar(sm, label='Epoch', cax=cbaxes)
             plt.tight_layout()
 
-            # plt.savefig('plots/mnist/' + activation + "_" + 'discriminator' + self.ARCH,bbox_inches='tight')
             fig_name = "infoplane_discriminator_" + self.ARCH + ".png"
             plt.savefig(os.path.join(self.save_plot_dir, fig_name),bbox_inches='tight')
