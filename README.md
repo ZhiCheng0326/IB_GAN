@@ -1,5 +1,4 @@
 # IB_GAN
-2020 Summer Project - Opening the black box of Generative Adversarial Network (GAN)
 
 ## Description
 This repository is modified from [artemyk/ibsgd](https://github.com/artemyk/ibsgd) to fit the experiment on GAN.
