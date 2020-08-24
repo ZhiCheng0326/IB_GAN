@@ -39,10 +39,10 @@ Compute Mutual Information and plot figures.
 Browse `plots/mnist` for all results with different activations. Showing plots below with `tanh` experiments.
 
 ### Information Plane
-<img src="https://github.com/ZhiCheng0326/IB_GAN/blob/master/plots/mnist/tanh/infoplane_discriminator_1024-512-256-1.PNG" width="1000px"/>
+<img src="https://github.com/ZhiCheng0326/IB_GAN/blob/master/plots/mnist/tanh/infoplane_discriminator_1024-512-256-1.png" width="1000px"/>
 
 ### Loss vs Mutual Information (Lower method)
-<img src="https://github.com/ZhiCheng0326/IB_GAN/blob/master/plots/mnist/tanh/LOSSvsMI_1024-512-256-1.PNG" width="1000px"/>
+<img src="https://github.com/ZhiCheng0326/IB_GAN/blob/master/plots/mnist/tanh/LOSSvsMI_1024-512-256-1.png" width="1000px"/>
 
 ## Summary
 <img src="https://github.com/ZhiCheng0326/IB_GAN/blob/master/plots/mnist/tanh/summary_1024-512-256-1.PNG" width="1000px"/>
