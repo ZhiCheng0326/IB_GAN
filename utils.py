@@ -10,8 +10,20 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
+def create_dir(rawdata_dir, img_dir, model_dir):
+    if not os.path.exists(rawdata_dir):
+        print("Making directory", rawdata_dir)
+        os.makedirs(self.rawdata_dir)
 
-def get_data(activation, isTrain, fake_size):
+    if not os.path.exists(img_dir):
+        print("Making directory", img_dir)
+        os.makedirs(img_dir)
+
+    if not os.path.exists(model_dir):
+        print("Making directory", model_dir)
+        os.makedirs(model_dir)
+
+def get_data(activation, isTrain, fake_size, model_dir):
     # Returns two namedtuples, with MNIST training and testing data
     #   trn.X is training data
     #   trn.y is trainiing class, with numbers from 0 to 9
@@ -35,7 +47,7 @@ def get_data(activation, isTrain, fake_size):
     trn = Dataset(X_train, y_train, Y_train)
 
     if not isTrain: # means not training phase, modified the test set for MI calculations
-        gen_imgs = fake_datasets(activation, fake_size)
+        gen_imgs = fake_datasets(activation, fake_size, model_dir)
         fake_y = np.zeros((fake_size,)).astype(int)
         y_test = np.ones((X_test.shape[0]-fake_size,)).astype(int)
         fake_real_tstX = np.concatenate([X_test[:X_test.shape[0]-fake_size], gen_imgs], axis=0)
@@ -50,16 +62,19 @@ def get_data(activation, isTrain, fake_size):
 
     return trn,tst
 
-def fake_datasets(activation, fake_size):
-    generator = load_model("models/generator_"+ activation + ".h5")
+def fake_datasets(activation, fake_size, model_dir):
+    g_fname = "generator_"+ activation +".h5"
+    generator = load_model(os.path.join(model_dir, g_fname))
     noise = np.random.normal(0, 1, (fake_size,100))
     gen_imgs = generator.predict(noise)
 
     return gen_imgs
 
-def save_model(generator, discriminator, activation):
-    generator.save("models/generator_"+ activation +".h5")
-    discriminator.save("models/discriminator_"+ activation+".h5")
+def save_model(generator, discriminator, activation, model_dir):
+    g_fname = "generator_"+ activation +".h5"
+    d_fname = "discriminator_"+ activation +".h5"
+    generator.save(os.path.join(model_dir, g_fname))
+    discriminator.save(os.path.join(model_dir, d_fname))
 
 def sample_images(generator, img_dir, epoch):
     latent_dim = 100

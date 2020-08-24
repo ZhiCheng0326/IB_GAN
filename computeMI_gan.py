@@ -25,7 +25,7 @@ import matplotlib.gridspec as gridspec
 import seaborn as sns
 sns.set_style('darkgrid')
 
-def computeMI(tst, measures, loss, PLOT_LAYERS, ARCH, MAX_EPOCHS):
+def computeMI(tst, measures, loss, PLOT_LAYERS, ARCH, MAX_EPOCHS, bin_number):
     # Functions to return upper and lower bounds on entropy of layer activity
     noise_variance = 1e-1                    # Added Gaussian noise variance
     Klayer_activity = K.placeholder(ndim=2)  # Keras placeholder
@@ -117,7 +117,7 @@ def computeMI(tst, measures, loss, PLOT_LAYERS, ARCH, MAX_EPOCHS):
 
                 """ Bin """
                 # binxm, binym = simplebinmi.bin_calc_information2(saved_labelixs, activity, 0.5)
-                binxm,  binym= simplebinmi.bin_calc_information(tst.X, activity, saved_labelixs, num_of_bins=30)
+                binxm,  binym= simplebinmi.bin_calc_information(tst.X, activity, saved_labelixs, num_of_bins=bin_number)
                 cepochdata['MI_XM_bin'].append( nats2bits * binxm )
                 cepochdata['MI_YM_bin'].append( nats2bits * binym )
                 pstr += ' | bin: MI(X;M)=%0.3f, MI(Y;M)=%0.3f' % (cepochdata['MI_XM_bin'][-1], cepochdata['MI_YM_bin'][-1])
@@ -146,12 +146,12 @@ def show_sampled_image(data, save_plot_dir):
 
 def main():
     parser = argparse.ArgumentParser(description='Calculate Mutual Information GAN')
-    parser.add_argument('--batch-size', type=int, default=32,
-                        help='input batch size for training (default: 32)')
     parser.add_argument('--activation', type=str, choices = ['tanh', 'relu', 'leakyrelu'], required = True,
                         help='options: tanh, relu, leakyrelu')
     parser.add_argument('--fake_size', type=int, default=5000,
                         help='proportion of fake images. Must be <=10000  (default:5000)')
+    parser.add_argument('--bin_number', type=int, default=30,
+                        help='number of bins (default:30)')
 
     args = parser.parse_args()
     activ = args.activation
@@ -161,7 +161,7 @@ def main():
         print("Making directory", save_plot_dir)
         os.makedirs(save_plot_dir)
 
-    _, tst = utils.get_data(activ, False, args.fake_size)
+    _, tst = utils.get_data(activ, False, args.fake_size, model_dir="models")
     print("tst.X.shape:", tst.X.shape)
     show_sampled_image(tst, save_plot_dir)  # to verify the mixed dataset is correct
 
@@ -179,7 +179,7 @@ def main():
     loss = defaultdict(list)
 
     """ Compute MI measures"""
-    measures, loss, PLOT_LAYERS = computeMI(tst, measures, loss, PLOT_LAYERS, ARCH, MAX_EPOCHS)
+    measures, loss, PLOT_LAYERS = computeMI(tst, measures, loss, PLOT_LAYERS, ARCH, MAX_EPOCHS, args.bin_number)
 
 
     """Init Plot """
@@ -197,7 +197,6 @@ def main():
 
 
 if __name__=='__main__':
-
     print("Start:", datetime.datetime.now())
     main()
     print("End:", datetime.datetime.now())

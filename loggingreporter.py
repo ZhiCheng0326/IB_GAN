@@ -9,22 +9,13 @@ import os
 import utils
 
 class LoggingReporter():
-    def __init__(self, trn, tst, rawdata_dir, img_dir, do_save_func=None):
+    def __init__(self, trn, tst, rawdata_dir, do_save_func=None):
         self.trn = trn  # Train data
         self.tst = tst  # Test data
         self.do_save_func = do_save_func
         self.rawdata_dir = rawdata_dir
-        self.img_dir = img_dir
 
     def on_train_begin(self, model):
-        if not os.path.exists(self.rawdata_dir):
-            print("Making directory", self.rawdata_dir)
-            os.makedirs(self.rawdata_dir)
-
-        if not os.path.exists(self.img_dir):
-            print("Making directory", self.img_dir)
-            os.makedirs(self.img_dir)
-
         # Indexes of the layers which we keep track of. Basically, this will be any layer
         # which has a 'kernel' attribute, which is essentially the "Dense" or "Dense"-like layers
         self.layerixs = []

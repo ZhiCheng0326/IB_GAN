@@ -241,7 +241,7 @@ class Plots():
         sm = plt.cm.ScalarMappable(cmap='gnuplot', norm=plt.Normalize(vmin=0, vmax=MAX_EPOCHS))
         sm._A = []
 
-        fig=plt.figure(figsize=(10,5))
+        fig=plt.figure(figsize=(6,5))
         for actndx, (activation, vals) in enumerate(self.measures.items()):
             epochs = sorted(vals.keys())
             if not len(epochs):

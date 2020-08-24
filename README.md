@@ -2,6 +2,7 @@
 
 ## Description
 This repository is modified from [artemyk/ibsgd](https://github.com/artemyk/ibsgd) to fit the experiment on GAN.
+GAN is trained on 3 activations (`tanh`, `relu`, `leakyrelu`) to compare their results.
 
 ## Prerequisites
 * python 3.5.6
@@ -35,3 +36,13 @@ Compute Mutual Information and plot figures.
 `python computeMI_gan.py --activation tanh`
 
 ## Results
+Browse `plots/mnist` for all results with different activations. Showing plots below with `tanh` experiments.
+
+### Information Plane
+<img src="https://github.com/ZhiCheng0326/IB_GAN/blob/master/plots/mnist/tanh/infoplane_discriminator_1024-512-256-1.PNG" width="1000px"/>
+
+### Loss vs Mutual Information (Lower method)
+<img src="https://github.com/ZhiCheng0326/IB_GAN/blob/master/plots/mnist/tanh/LOSSvsMI_1024-512-256-1.PNG" width="1000px"/>
+
+## Summary
+<img src="https://github.com/ZhiCheng0326/IB_GAN/blob/master/plots/mnist/tanh/summary_1024-512-256-1.PNG" width="1000px"/>

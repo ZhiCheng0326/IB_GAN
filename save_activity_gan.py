@@ -32,6 +32,7 @@ class GAN():
         self.activation = args.activation
         self.rawdata_dir = 'rawdata/' + self.activation + '_' + '1024-512-256-1'
         self.img_dir = "images_" + self.activation
+        self.model_dir = "models"
 
         optimizer = Adam(args.lr, args.beta_1)
 
@@ -55,12 +56,16 @@ class GAN():
         self.gan = Model(ganInput, ganOutput)
         self.gan.compile(loss='binary_crossentropy', optimizer=optimizer)
 
+        # Create dir
+        utils.create_dir(self.rawdata_dir, self.img_dir, self.model_dir)
         # Load the dataset
-        self.trn, self.tst = utils.get_data(self.activation, args.isTrain, args.fake_size)
+        self.trn, self.tst = utils.get_data(self.activation, args.isTrain, args.fake_size, self.model_dir)
         print("tst shape:", self.tst.X.shape)
 
         ## Initialize LoggingReporter
-        self.log = LoggingReporter(self.trn, self.tst, self.rawdata_dir, self.img_dir, do_save_func=self.do_report)
+        self.log = LoggingReporter(self.trn, self.tst, self.rawdata_dir, do_save_func=self.do_report)
+
+
 
     def build_generator(self):
 
@@ -174,7 +179,7 @@ class GAN():
 
             if isTrain:
                 if epoch == (epochs-1): #only save model at last epoch
-                    utils.save_model(self.generator,self.discriminator, self.activation)
+                    utils.save_model(self.generator,self.discriminator, self.activation, self.model_dir)
 
                 # If at save interval => save generated image samples
                 if self.do_report is not None and self.do_report(epoch):
@@ -185,7 +190,6 @@ class GAN():
 
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser(description='Information Bottleneck GAN')
     parser.add_argument('--batch-size', type=int, default=32,
                         help='input batch size for training (default: 32)')
